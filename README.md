@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CARLA VR Pedestrian Framework
 
 Interactive VR pedestrian simulation built on top of CARLA Simulator, for pedestrian behavior and traffic safety studies. A VR-tracked player walks through a CARLA town while autonomous vehicles (via CARLA's Traffic Manager) detect and yield to them.
@@ -39,3 +40,6 @@ VR rendering is significantly more demanding than desktop preview — a dedicate
 
 - Tested primarily on `Town10HD_Opt`; moving to a different map requires re-placing the player actor and re-validating the camera height offset for that map's ground level.
 - Traffic Manager pedestrian detection has been validated on `Town10HD_Opt`; a discrepancy was observed on `Town01` (vehicles not consistently detecting the player) that is still under investigation.
+=======
+
+>>>>>>> b671db44baffb461eb56396c34ba6891d9ace05c
