@@ -16,20 +16,21 @@ def main():
         spawn_points = world.get_map().get_spawn_points()
 
         # ---------------------------------------------------
-        # 1. Ρύθμιση Traffic Manager (Αποφυγή Πεζών)
+        # 1. Traffic Manager setup (pedestrian avoidance)
         # ---------------------------------------------------
         tm = client.get_trafficmanager(8000)
         tm_port = tm.get_port()
         tm.set_global_distance_to_leading_vehicle(4.0)
 
         # ---------------------------------------------------
-        # 2. Spawn 40 Αυτόνομων Οχημάτων
+        # 2. Spawn 40 autonomous vehicles
         # ---------------------------------------------------
-        print("Γίνεται spawn σε 40 αυτόνομα οχήματα...")
+        NUM_VEHICLES = 40
+        print(f"Spawning {NUM_VEHICLES} autonomous vehicles...")
         vehicle_bps = blueprint_library.filter('vehicle.*')
         random.shuffle(spawn_points)
 
-        for i in range(min(20, len(spawn_points))):
+        for i in range(min(NUM_VEHICLES, len(spawn_points))):
             bp = random.choice(vehicle_bps)
             vehicle = world.try_spawn_actor(bp, spawn_points[i])
             if vehicle is not None:
@@ -40,10 +41,10 @@ def main():
                 tm.distance_to_leading_vehicle(vehicle, 4.5)
                 vehicle_list.append(vehicle)
 
-        print(f"Στο χάρτη κινούνται {len(vehicle_list)} οχήματα.")
+        print(f"{len(vehicle_list)} vehicles are now moving in the map.")
 
         # ---------------------------------------------------
-        # 3. Spawn CARLA Walker (Κλώνος σε ασφαλές σημείο)
+        # 3. Spawn CARLA walker (proxy) at a safe location
         # ---------------------------------------------------
         walker_bp = blueprint_library.find('walker.pedestrian.0001')
         if walker_bp.has_attribute('is_invincible'):
@@ -57,15 +58,15 @@ def main():
             clone = world.spawn_actor(walker_bp, initial_sp)
 
         walker_list.append(clone)
-        print(f"Ο κλώνος είναι ενεργός (ID: {clone.id}).")
+        print(f"Proxy walker is active (ID: {clone.id}).")
 
         # ---------------------------------------------------
-        # 4. Βρόχος Συγχρονισμού με Ασφαλή Απόσταση
+        # 4. Sync loop with a safe offset distance
         # ---------------------------------------------------
         spectator = world.get_spectator()
-        print("Η προσομοίωση τρέχει! Περπάτα στον δρόμο. (Ctrl+C για έξοδο)")
+        print("Simulation is running! Walk around. (Ctrl+C to exit)")
 
-        MIN_SAFE_DISTANCE = 1.6  # ελάχιστη απόσταση clone-παίκτη σε μέτρα
+        MIN_SAFE_DISTANCE = 1.6  # minimum clone-to-player distance in meters
 
         while True:
             world.wait_for_tick()
@@ -85,14 +86,13 @@ def main():
             clone.set_transform(carla.Transform(target_loc, cam_tf.rotation))
 
     except KeyboardInterrupt:
-        print("\nΖητήθηκε τερματισμός από τον χρήστη...")
+        print("\nShutdown requested by user...")
 
     finally:
-        print("Καθαρισμός οχημάτων και κλώνου...")
+        print("Cleaning up vehicles and proxy walker...")
         client.apply_batch([carla.command.DestroyActor(x) for x in vehicle_list])
         client.apply_batch([carla.command.DestroyActor(x) for x in walker_list])
-        print("Ολοκληρώθηκε.")
+        print("Done.")
 
 if __name__ == '__main__':
     main()
-
